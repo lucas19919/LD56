@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShipMaster : MonoBehaviour
+public class EnemyShipFloat : MonoBehaviour
 {
     public Transform floater1;
     public Transform floater2;
@@ -14,25 +14,16 @@ public class ShipMaster : MonoBehaviour
     public float rockAmount;
     public float rockSpeed;
 
-    public Transform ship; 
-
-    public float speed;
-    public float rotationSpeed;
+    public Transform ship;
 
     private Vector3 direction;
     private float averageHeight;
     private float zRotation;
 
-    private Rigidbody rb;
-
-    private void Start()
+    void Update()
     {
-        rb = this.GetComponent<Rigidbody>();
-    }
-    private void Update()
-    {
-        HandleMovement();
         HandleBuoyancyAndRocking();
+
     }
 
     void HandleBuoyancyAndRocking()
@@ -57,39 +48,6 @@ public class ShipMaster : MonoBehaviour
                 ship.transform.rotation.eulerAngles.y,
                 zRotation
             );
-        }
-    }
-
-    void HandleMovement()
-    {
-        float moveVertical = Input.GetAxis("Vertical");
-        float rotateHorizontal = Input.GetAxis("Horizontal");
-
-        Vector3 movement = transform.forward * -moveVertical * speed * Time.deltaTime;
-        rb.velocity = new Vector3(movement.x, 0, movement.z);
-
-
-        if (moveVertical > 0)
-        {
-            this.transform.Rotate(0, rotateHorizontal * rotationSpeed * Time.deltaTime, 0);
-        }
-        else if (rotateHorizontal != 0)
-        {
-            float stationaryRotationSpeed = rotationSpeed * 0.33f;
-            this.transform.Rotate(0, rotateHorizontal * stationaryRotationSpeed * Time.deltaTime, 0);
-        }
-    }
-
-    private void OnDrawGizmos()
-    {
-        // Visualize the floater positions in the editor
-        Gizmos.color = Color.yellow;
-        if (floater1 && floater2 && floater3 && floater4)
-        {
-            Gizmos.DrawSphere(floater1.position, 0.05f);
-            Gizmos.DrawSphere(floater2.position, 0.05f);
-            Gizmos.DrawSphere(floater3.position, 0.05f);
-            Gizmos.DrawSphere(floater4.position, 0.05f);
         }
     }
 }
