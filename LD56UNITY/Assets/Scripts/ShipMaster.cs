@@ -14,9 +14,8 @@ public class ShipMaster : MonoBehaviour
     public float rockAmount;
     public float rockSpeed;
 
-    public Transform ship;  // Only apply buoyancy physics to this child transform
+    public Transform ship; 
 
-    // ShipController variables
     public float speed;
     public float rotationSpeed;
 
@@ -24,6 +23,12 @@ public class ShipMaster : MonoBehaviour
     private float averageHeight;
     private float zRotation;
 
+    private Rigidbody rb;
+
+    private void Start()
+    {
+        rb = this.GetComponent<Rigidbody>();
+    }
     private void Update()
     {
         HandleMovement();
@@ -58,17 +63,11 @@ public class ShipMaster : MonoBehaviour
     void HandleMovement()
     {
         float moveVertical = Input.GetAxis("Vertical");
-
-        float yRotationRad = this.transform.eulerAngles.y * Mathf.Deg2Rad;
-        Vector3 forwardDirection = new Vector3(Mathf.Sin(yRotationRad), 0, Mathf.Cos(yRotationRad));
-
-        if (moveVertical > 0)
-        {
-            Vector3 movement = forwardDirection * -moveVertical * speed * Time.deltaTime;
-            this.transform.position += movement;
-        }
-
         float rotateHorizontal = Input.GetAxis("Horizontal");
+
+        Vector3 movement = transform.forward * -moveVertical * speed * Time.deltaTime;
+        rb.velocity = new Vector3(movement.x, 0, movement.z);
+
 
         if (moveVertical > 0)
         {
