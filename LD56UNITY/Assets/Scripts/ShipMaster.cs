@@ -65,12 +65,11 @@ public class ShipMaster : MonoBehaviour
         float moveVertical = Input.GetAxis("Vertical");
         float rotateHorizontal = Input.GetAxis("Horizontal");
 
-        Vector3 movement = transform.forward * -moveVertical * speed * Time.deltaTime;
-        rb.velocity = new Vector3(movement.x, 0, movement.z);
-
-
         if (moveVertical > 0)
         {
+            Vector3 movement = transform.forward * -moveVertical * speed * Time.deltaTime;
+            rb.velocity = new Vector3(movement.x, 0, movement.z);
+
             this.transform.Rotate(0, rotateHorizontal * rotationSpeed * Time.deltaTime, 0);
         }
         else if (rotateHorizontal != 0)

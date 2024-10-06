@@ -27,7 +27,7 @@ public class HealthManager : MonoBehaviour
 
             if (this.gameObject.tag == "Player")
             {
-                SceneManager.EndScreen();
+                SceneController.DeathScreen();
             }
         }
     }
@@ -59,7 +59,9 @@ public class HealthManager : MonoBehaviour
     {
         if (shipsSunkCount == 3)
         {
-
+            SceneController.WinScreen();
         }
+
+        Debug.Log(shipsSunkCount);
     }
 }

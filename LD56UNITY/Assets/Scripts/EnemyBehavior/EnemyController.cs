@@ -17,6 +17,8 @@ public class EnemyController : MonoBehaviour
 
     private Rigidbody rb;
     private CannonFire cannonFire;
+
+    private float playerDistance;
     
     void Start()
     {
@@ -26,6 +28,14 @@ public class EnemyController : MonoBehaviour
 
     void Update()
     {
+        playerDistance = (player.position - origin.position).magnitude;
+
+        if (playerDistance <= (2 * patrolRadius))
+            SetState(AIState.ENGAGE);
+        else
+            SetState(AIState.PATROL);
+
+
         switch (currentState)
         {
             case AIState.PATROL:
@@ -55,43 +65,54 @@ public class EnemyController : MonoBehaviour
             transform.rotation = Quaternion.RotateTowards(transform.rotation, desiredRotation, rotSpeed * Time.deltaTime);
         }
 
-        rb.velocity = transform.forward * speed;
+        Vector3 movement = transform.forward * speed * Time.deltaTime;
+        rb.velocity = new Vector3 (movement.x, 0, movement.z);
     }
 
     private void Engage()
     {
         Vector3 directionToPlayer = player.position - transform.position;
         float distanceToPlayer = directionToPlayer.magnitude;
-        float dotProduct = Vector3.Dot(transform.right, directionToPlayer);
+        Vector3 directionToPlayerNormalized = directionToPlayer.normalized;
 
-        bool obstacleInFront = Physics.Raycast(transform.position, transform.forward, 15);
-        bool obstacleBehind = Physics.Raycast(transform.position, -transform.forward, 10);
+        // Step 1: Move to Optimal Distance
+        float optimalDistance = 25.0f;
+        float distanceTolerance = 5.0f;
 
-        // Distance adjustments
-        float optimalDistance = 25; // Adjust this based on your needs
-        if (distanceToPlayer > optimalDistance + 5 && !obstacleInFront)
+        if (distanceToPlayer > optimalDistance + distanceTolerance)
         {
+            // Move towards the player if too far
             rb.velocity = transform.forward * speed;
         }
-        else if (distanceToPlayer < optimalDistance - 5 && !obstacleBehind)
+        else if (distanceToPlayer < optimalDistance - distanceTolerance)
         {
-            rb.velocity = transform.forward * -speed;
+            // Move away from the player if too close
+            rb.velocity = -transform.forward * speed;
         }
         else
         {
-            rb.velocity = Vector3.zero; // Stop if we are at an optimal distance
+            // Stop movement if within optimal distance
+            rb.velocity = Vector3.zero;
         }
 
-        // Orientation adjustments
-        Vector3 offsetPosition = player.position - transform.right * optimalDistance; // Adjust AI's target position slightly to the left of the player
-        Quaternion targetRotation = Quaternion.LookRotation(offsetPosition - transform.position);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotSpeed * Time.deltaTime);
+        // Step 2: Align Perpendicular to Player
+        // Check if we are nearly perpendicular (using dot product with transform.right)
+        float dotProduct = Vector3.Dot(transform.right, directionToPlayerNormalized);
 
-        if (Mathf.Abs(dotProduct) > 0.95) // If we are nearly perpendicular to the target
+        // Rotate until the boat is perpendicular
+        if (Mathf.Abs(dotProduct) < 0.95f)
         {
+            // Calculate target rotation so that transform.right is aligned with direction to player
+            Quaternion targetRotation = Quaternion.LookRotation(directionToPlayerNormalized, Vector3.up) * Quaternion.Euler(0, 90, 0);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotSpeed * Time.deltaTime);
+        }
+        else
+        {
+            // Step 3: Fire Cannons when aligned perpendicularly
             cannonFire.FireCannon();
         }
     }
+
 
     public void SetState(AIState newState)
     {
