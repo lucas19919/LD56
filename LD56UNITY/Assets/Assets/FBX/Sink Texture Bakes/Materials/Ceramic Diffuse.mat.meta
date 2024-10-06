@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:LD56UNITY/Assets/Assets/FBX/Sink Texture Bakes/Materials/Ceramic Diffuse.mat.meta
 guid: 9942c304d80063347bb9cf55b371dd4d
+========
+guid: a852fe74a1537234b8b5831aaf1c501c
+>>>>>>>> 7dd78ca9f3bb701905ff474501dec0d4e8f75357:LD56UNITY/Assets/Assets/FBX/Texture/Wood.mat.meta
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 2100000

@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:LD56UNITY/Assets/Assets/FBX/Sink Texture Bakes/Materials.meta
 guid: 0b88ee890bf86004aab20a790d074f9a
+========
+guid: 220e2c72b74da254293048e8268bca30
+>>>>>>>> 7dd78ca9f3bb701905ff474501dec0d4e8f75357:LD56UNITY/Assets/Scripts/EnemyBehavior.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
