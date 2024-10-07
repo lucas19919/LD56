@@ -7,7 +7,9 @@ public class HealthManager : MonoBehaviour
     public float Health = 99;
     public float duration = 3f;
 
-    public static int shipsSunkCount;
+    public static int shipsSunkCount; 
+
+    public SceneController controller;
     
     public void cannonHit(float damage)
     {
@@ -27,7 +29,7 @@ public class HealthManager : MonoBehaviour
 
             if (this.gameObject.tag == "Player")
             {
-                SceneController.DeathScreen();
+                controller.DeathScreen();
             }
         }
     }
@@ -38,28 +40,29 @@ public class HealthManager : MonoBehaviour
     }
     IEnumerator Lower()
     {
-            float startTime = Time.time;
-            Vector3 initialPosition = this.transform.position;
-            Vector3 targetPosition = initialPosition + (Vector3.down);
+        float startTime = Time.time;
+        Vector3 initialPosition = this.transform.position;
+        Vector3 targetPosition = initialPosition + (Vector3.down);
 
-            while (Time.time - startTime < duration)
-            {
-                float t = (Time.time - startTime) / duration;
-                transform.position = Vector3.Lerp(initialPosition, targetPosition, t);
-                yield return null;
-            }
+        while (Time.time - startTime < duration)
+        {
+            float t = (Time.time - startTime) / duration;
+            transform.position = Vector3.Lerp(initialPosition, targetPosition, t);
+            yield return null;
+        }
 
-            transform.position = targetPosition;
-            shipsSunkCount++;
-            checkWinCondition();
-            Destroy(this.gameObject);
+        transform.position = targetPosition;
+        shipsSunkCount++;
+        checkWinCondition();
+        Destroy(this.gameObject);
+        yield return null;
     }
 
     private void checkWinCondition()
     {
         if (shipsSunkCount == 3)
         {
-            SceneController.WinScreen();
+            controller.WinScreen();
         }
 
         Debug.Log(shipsSunkCount);

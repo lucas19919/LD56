@@ -43,19 +43,19 @@ Material:
     m_Floats:
     - _Depth: 0.8
     - _Foam_Distance: 0.5
-    - _Metallic: 0.2
+    - _Metallic: 0
     - _Noise_Scale: 0.02
-    - _NormalStrength: 0.05
+    - _NormalStrength: 0.11
     - _QueueControl: 0
     - _Refraction: 1.9
-    - _Smoothness: 1
+    - _Smoothness: 0.69
     - _Strength: 0.79
     - _Transparency: 0.33
     - _Wave_Speed: 0.01
     m_Colors:
     - _DeepColor: {r: 0.068218224, g: 0.5213639, b: 0.6886792, a: 0.4627451}
     - _Foam_Color: {r: 0.025542913, g: 0.48003608, b: 0.7735849, a: 1}
-    - _ShallowColor: {r: 0.20990565, g: 0.79568887, b: 0.8396226, a: 0.3529412}
+    - _ShallowColor: {r: 0.20990565, g: 0.79568887, b: 0.8396226, a: 0.49019608}
     - _Water_Color: {r: 0.08018869, g: 0.5989383, b: 1, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &7408557084859005989

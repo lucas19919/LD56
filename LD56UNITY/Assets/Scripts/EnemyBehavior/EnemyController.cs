@@ -34,7 +34,7 @@ public class EnemyController : MonoBehaviour
     {
         playerDistance = (player.position - origin.position).magnitude;
 
-        if (playerDistance <= (2 * patrolRadius))
+        if (playerDistance <= (3 * patrolRadius))
             SetState(AIState.ENGAGE);
         else
             SetState(AIState.PATROL);
