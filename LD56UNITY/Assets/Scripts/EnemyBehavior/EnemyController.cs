@@ -19,7 +19,11 @@ public class EnemyController : MonoBehaviour
     private CannonFire cannonFire;
 
     private float playerDistance;
-    
+
+    // Constants for boat behavior
+    float optimalDistance = 7.5f;
+    float obstacleAvoidanceStrength = 1.0f;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -71,47 +75,110 @@ public class EnemyController : MonoBehaviour
 
     private void Engage()
     {
-        Vector3 directionToPlayer = player.position - transform.position;
-        float distanceToPlayer = directionToPlayer.magnitude;
-        Vector3 directionToPlayerNormalized = directionToPlayer.normalized;
+        Vector3 directionToPlayer = player.position - transform.position; // Direction towards the player
+        float distanceToPlayer = directionToPlayer.magnitude; // Calculate distance to the player
+        directionToPlayer.Normalize(); // Normalize the direction to the player
 
-        // Step 1: Move to Optimal Distance
-        float optimalDistance = 25.0f;
-        float distanceTolerance = 5.0f;
-
-        if (distanceToPlayer > optimalDistance + distanceTolerance)
+        // Step 1: Check for obstacles and avoid if necessary
+        if (CheckForObstacles(out Vector3 avoidanceDirection))
         {
-            // Move towards the player if too far
-            rb.velocity = transform.forward * speed;
-        }
-        else if (distanceToPlayer < optimalDistance - distanceTolerance)
-        {
-            // Move away from the player if too close
-            rb.velocity = -transform.forward * speed;
+            // Steer away from the obstacle if detected
+            SteerTowards(avoidanceDirection);
         }
         else
         {
-            // Stop movement if within optimal distance
-            rb.velocity = Vector3.zero;
+            // Step 2: Engage with the player normally
+            if (distanceToPlayer > optimalDistance + 2.0f) // Too far, steer inward
+            {
+                SteerTowards(directionToPlayer); // Steer toward the player to reduce distance
+            }
+            else if (distanceToPlayer < optimalDistance - 2.0f) // Too close, steer outward
+            {
+                SteerAway(directionToPlayer); // Steer away from the player to increase distance
+            }
+            else
+            {
+                // Within optimal distance, just circle the player
+                CirclePlayer(directionToPlayer);
+            }
+
+            // Step 3: Fire when perpendicular to the player
+            if (IsPerpendicularToPlayer(directionToPlayer))
+            {
+                cannonFire.FireCannon(); // Fire when aligned for the shot
+            }
         }
 
-        // Step 2: Align Perpendicular to Player
-        // Check if we are nearly perpendicular (using dot product with transform.right)
-        float dotProduct = Vector3.Dot(transform.right, directionToPlayerNormalized);
-
-        // Rotate until the boat is perpendicular
-        if (Mathf.Abs(dotProduct) < 0.95f)
-        {
-            // Calculate target rotation so that transform.right is aligned with direction to player
-            Quaternion targetRotation = Quaternion.LookRotation(directionToPlayerNormalized, Vector3.up) * Quaternion.Euler(0, 90, 0);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotSpeed * Time.deltaTime);
-        }
-        else
-        {
-            // Step 3: Fire Cannons when aligned perpendicularly
-            cannonFire.FireCannon();
-        }
+        // Step 4: Move forward
+        rb.velocity = transform.forward * speed * Time.deltaTime; // Always move forward
     }
+
+    // This method checks for obstacles in front of the boat and returns a steering direction if found
+    private bool CheckForObstacles(out Vector3 avoidanceDirection)
+    {
+        float rayDistance = 15.0f; // How far the ray will check for obstacles
+        avoidanceDirection = Vector3.zero;
+
+        // Cast a ray forward to detect obstacles
+        if (Physics.Raycast(transform.position, transform.forward, rayDistance))
+        {
+            // Obstacle detected in front, we need to steer away
+            // Try to steer to the right or left depending on open space
+            Vector3 rightCheck = transform.right * 2; // Check to the right
+            Vector3 leftCheck = -transform.right * 2; // Check to the left
+
+            // Cast rays to the right and left to find open space
+            bool rightClear = !Physics.Raycast(transform.position, transform.right, rayDistance / 2);
+            bool leftClear = !Physics.Raycast(transform.position, -transform.right, rayDistance / 2);
+
+            if (rightClear)
+            {
+                avoidanceDirection = transform.right * obstacleAvoidanceStrength;
+            }
+            else if (leftClear)
+            {
+                avoidanceDirection = -transform.right * obstacleAvoidanceStrength;
+            }
+            else
+            {
+                // If both directions are blocked, steer hard left as a last resort
+                avoidanceDirection = -transform.right * obstacleAvoidanceStrength;
+            }
+
+            return true; // Return true since we detected an obstacle
+        }
+
+        return false; // No obstacle detected
+    }
+
+    // This method steers the boat towards the player or an avoidance direction
+    private void SteerTowards(Vector3 targetDirection)
+    {
+        Quaternion targetRotation = Quaternion.LookRotation(targetDirection, Vector3.up);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotSpeed * Time.deltaTime);
+    }
+
+    // This method steers the boat away from the player to increase distance
+    private void SteerAway(Vector3 directionToPlayer)
+    {
+        Vector3 awayDirection = -directionToPlayer; // Invert direction to move away
+        SteerTowards(awayDirection);
+    }
+
+    // This method keeps the boat circling the player at optimal distance
+    private void CirclePlayer(Vector3 directionToPlayer)
+    {
+        Vector3 tangentDirection = Vector3.Cross(directionToPlayer, Vector3.up).normalized; // Tangent direction for circling
+        SteerTowards(tangentDirection); // Steer towards the tangent to circle the player
+    }
+
+    // This method checks if the boat is perpendicular to the player for firing
+    private bool IsPerpendicularToPlayer(Vector3 directionToPlayer)
+    {
+        float dotProduct = Vector3.Dot(transform.right, directionToPlayer); // Dot product between the right side and the player
+        return Mathf.Abs(dotProduct) > 0.98f; // Consider it perpendicular if close to 1 (or -1)
+    }
+
 
 
     public void SetState(AIState newState)
